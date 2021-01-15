@@ -1,0 +1,2 @@
+class AlreadyUseTaskKillError(Exception):
+    pass

@@ -1,0 +1,2 @@
+class NotAttackError(Exception):
+    pass

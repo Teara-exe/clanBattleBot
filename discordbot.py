@@ -84,11 +84,7 @@ def sign(n : int):
     if 0 < n : return 1
     return 0
 
-class GachaRate():
-    def __init__(self, rate, star, namelist):
-        self.rate : float = rate
-        self.star : int = star
-        self.namelist : List[str] = namelist
+
 
 class PrizeRate():
     def __init__(self, rate, star, memorial, stone, heart):
@@ -114,316 +110,76 @@ class Princess():
             return "[★%d]" % self.star
         return "★%d" % self.star
 
-class GachaSchedule:
-    def __init__(self, startdate, gachatype, name):
-        self.startdate = startdate
-        self.gachatype = gachatype
-        self.name = name
-    
-    def Serialize(self):
-        ret = {}
-        ignore = []
 
-        for key, value in self.__dict__.items():
-            if not key in ignore:
-                ret[key] = value
 
-        return ret
 
+class GlobalStorage:
     @staticmethod
-    def Deserialize(dic):
-        result = GachaSchedule('', '', '')
-        for key, value in dic.items():
-            result.__dict__[key] = value
-        return result
-
-
-class GlobalStrage:
-    @staticmethod
-    def SerializeList(data):
+    def serialize_list(data):
         result = []
         for d in data:
             result.append(d.Serialize())
         return result
 
     @staticmethod
-    def Load():
+    def load():
+        """
+        外部ファイル(settings.json)に保持したデータを読み込む
+
+        :return:
+        """
         global GachaData
         global BossName
         global BATTLESTART
         global BATTLEPRESTART
         global BATTLEEND
 
+        # file open
         with open(SETTINGFILE) as a:
-            mdic =  json.load(a)
+            mdic = json.load(a)
 
-            if ('GachaData' in mdic):
+            if 'GachaData' in mdic:
                 gdata = []
                 for m in mdic['GachaData']:
                     gdata.append(GachaSchedule.Deserialize(m))
 
                 GachaData = gdata
 
-            if ('BossName' in mdic):
+            if 'BossName' in mdic:
                 BossName = mdic['BossName']
 
-            if ('BATTLESTART' in mdic):
+            if 'BATTLESTART' in mdic:
                 BATTLESTART = mdic['BATTLESTART']
                 start = datetime.datetime.strptime(BATTLESTART, '%m/%d')
-                BATTLEPRESTART = (start + datetime.timedelta(days = -1)).strftime('%m/%d')
+                BATTLEPRESTART = (start + datetime.timedelta(days=-1)).strftime('%m/%d')
 
-            if ('BATTLEEND' in mdic):
+            if 'BATTLEEND' in mdic:
                 BATTLEEND = mdic['BATTLEEND']
 
     @staticmethod
-    def Save():
-        GachaDataSerialize = []
+    def save():
+        """
+        サーバで持ってる内部データをsettings.jsonに出力する
+
+        :return:
+        """
+        gacha_data_serialize = []
         for m in GachaData:
-            GachaDataSerialize.append(m.Serialize())
+            gacha_data_serialize.append(m.Serialize())
 
         dic = {
-            'GachaData': GachaDataSerialize,
-            'BossName' : BossName,
-            'BATTLESTART' : BATTLESTART,
-            'BATTLEEND' : BATTLEEND,
+            'GachaData': gacha_data_serialize,
+            'BossName': BossName,
+            'BATTLESTART': BATTLESTART,
+            'BATTLEEND': BATTLEEND,
         }
 
         with open(SETTINGFILE, 'w') as a:
-            json.dump(dic, a , indent=4)
-
-class Gacha():
-    pname =  ['ユイ(プリンセス)', 'コッコロ(プリンセス)', 'ペコリーヌ(プリンセス)', 'クリスティーナ', 'ムイミ', 'ネネカ']
-    s3name = ['マコト','キョウカ','トモ','ルナ','カスミ','ジュン','アリサ','アン','クウカ(オーエド)',
-            'ニノン(オーエド)','ミミ(ハロウィン)','ルカ','クロエ','イリヤ','アンナ','グレア','カヤ',
-            'イリヤ(クリスマス)','カスミ(マジカル)','ノゾミ','マホ','シズル','サレン','ジータ','ニノン',
-            'リノ','アキノ','モニカ','イオ','ハツネ','アオイ(編入生)','ユニ','チエル','リン(レンジャー)',
-            'マヒル(レンジャー)','リノ(ワンダー)','イノリ', 'ナナカ(サマー)']
-    s2name = ['カオリ','ナナカ','エリコ','シオリ','ミミ','タマキ','マツリ','スズナ','ミヤコ','クウカ',
-            'アカリ','ミツキ','ツムギ','ミサト','アヤネ','シノブ','チカ','ミフユ','リン','ユキ','マヒル']
-    s1name = ['レイ','ヨリ','ヒヨリ','リマ','ユカリ','クルミ','ミソギ','スズメ','アユミ','アオイ','ミサキ']
-
-    limited = ['ユイ(ニューイヤー)','ヒヨリ(ニューイヤー)','キャル(ニューイヤー)','コッコロ(ニューイヤー)',
-            'シズル(バレンタイン)','ペコリーヌ(サマー)','スズメ(サマー)','タマキ(サマー)','キャル(サマー)',
-            'スズナ(サマー)','サレン(サマー)','マホ(サマー)','マコト(サマー)','ルカ(サマー)',
-            'シノブ(ハロウィン)','キョウカ(ハロウィン)','チカ(クリスマス)','アヤネ(クリスマス)',
-            'クリスティーナ(クリスマス)','エミリア','レム','ウヅキ(デレマス)','リン(デレマス)',]
-    event = ['レイ(ニューイヤー)','スズメ(ニューイヤー)','エリコ(バレンタイン)','コッコロ(サマー)',
-            'ミフユ(サマー)','イオ(サマー)','カオリ(サマー)','アンナ(サマー)','ミヤコ(ハロウィン)',
-            'ミソギ(ハロウィン)','クルミ(クリスマス)','ノゾミ(クリスマス)','ラム','ミオ(デレマス)',
-            'アユミ(ワンダー)', 'キャル','ペコリーヌ','コッコロ','ユイ']
+            json.dump(dic, a, indent=4)
 
 
-    def __init__(self):
-        self.gachabox : List[GachaRate] = []
-        self.limitdate = '2000/01/01 00:00:00'
-        self.gachatype = '3'
-        self.prize = False
 
-    def GachaSave(self):
-        global GachaData
-
-        GachaData = []
-        for n in self.s3name:
-            GachaData.append(GachaSchedule('2000/01/01 00:00:00', '3', n))
-
-        for n in self.s2name:
-            GachaData.append(GachaSchedule('2000/01/01 00:00:00', '2', n))
-
-        for n in self.s1name:
-            GachaData.append(GachaSchedule('2000/01/01 00:00:00', '1', n))
-
-        for n in self.pname:
-            GachaData.append(GachaSchedule('2000/01/01 00:00:00', 'f', n))
-
-        GachaData.append(GachaSchedule('2020/06/24 12:00:00', 'p', 'クリスティーナ(クリスマス)'))
-        GachaData.append(GachaSchedule('2020/06/30 12:00:00', 'f', 'ユイ(プリンセス)'))
-
-        GlobalStrage.Save()
-
-    @staticmethod
-    def typetoindex(c) -> int:
-        if (c == 'd'): return 0
-        if (c == 'l'): return 0
-        if (c == 'p'): return 0
-        if (c == 'f'): return 1
-        if (c == '3'): return 2
-        if (c == '2'): return 3
-        if (c == '1'): return 4
-        return -1
-        
-    def PickUpDelete(self, name):
-        if type(name) is list:
-            for m in name:
-                self.PickUpDelete(m)
-        
-        for gacharate in self.gachabox:
-            if name in gacharate.namelist:
-                gacharate.namelist.remove(name)
-
-    def Decorate(self):
-        for i in range(len(self.gachabox[0].namelist)):
-            self.gachabox[0].namelist[i] += ' PicuUp!'
-
-        for i in range(len(self.gachabox[1].namelist)):
-            self.gachabox[1].namelist[i] += ' PriFes!'
-
-    def FindPrincess(self, name):
-        if len(self.gachabox) == 0:
-            self.GetBoxData()
-        
-        if name in self.limited: return 'l'
-        if name in self.gachabox[0].namelist: return self.gachatype
-        if name in self.gachabox[1].namelist: return 'f'
-        if name in self.gachabox[2].namelist: return '3'
-        if name in self.gachabox[3].namelist: return '2'
-        if name in self.gachabox[4].namelist: return '1'
-
-        return '0'
-
-    @staticmethod
-    def AppendList(namelist, name):
-        if type(name) is list:
-            for n in name:
-                if n not in namelist:
-                   namelist.append(n)
-        else:
-            if name not in namelist:
-                namelist.append(name)
-
-    def BoxReset(self):
-        self.gachabox = []
-        self.limitdate = '2000/01/01 00:00:00'
-
-    def GetBoxData(self) -> List[GachaRate]:
-        datetime_format = datetime.datetime.now()
-        datestr = datetime_format.strftime("%Y/%m/%d %H:%M:%S")  # 2017/11/12 09:55:28
-
-        if self.limitdate is None:
-            if GachaData[-1].startdate <= datestr:
-                return self.gachabox
-        elif datestr < self.limitdate:
-            return self.gachabox
-
-        self.limitdate = None
-        pickup = None
-        self.gachabox : List[GachaRate] = [
-            GachaRate(0.0, 3, []),
-            GachaRate(0.0, 3, []),
-            GachaRate(0.0, 3, []),
-            GachaRate(0.0, 2, []),
-            GachaRate(0.0, 1, []),
-        ]
-
-        for m in GachaData:
-            if datestr < m.startdate:
-                self.limitdate = m.startdate
-                break
-
-            pickup = m
-            n = self.typetoindex(m.gachatype)
-            if 0 < n:
-                self.AppendList(self.gachabox[n].namelist, m.name)
-            else:
-                self.AppendList(self.limited, m.name)
-
-        self.PickUpDelete(pickup.name)
-        self.AppendList(self.gachabox[0].namelist, pickup.name)
-        self.Decorate()
-
-        lot = GachaLotData[0]
-        if pickup.gachatype == 'l': lot = GachaLotData[1]
-        if pickup.gachatype == 'p': lot = GachaLotData[2]
-        if pickup.gachatype == 'd': lot = GachaLotData[3]
-        if pickup.gachatype == 'f': lot = GachaLotData[4]
-
-        for m in range(len(lot)):
-            self.gachabox[m].rate = lot[m]
-
-        if pickup.gachatype == 'p': self.prize = True
-        else: self.prize = False
-
-        self.gachatype = pickup.gachatype
-
-        return self.gachabox
-
-    @staticmethod
-    def NameListToString(namelist):
-        if type(namelist) is str: 
-            return namelist
-        if type(namelist) is list:
-            return ','.join(namelist)
-        return ''
-
-    def ToString(self):
-        self.GetBoxData()
-
-        message = ''
-        message += '%s %s\n' % (self.GachaType(self.gachatype), GachaData[-1].startdate)
-
-        for rate in self.gachabox:
-            unitrate = 0.0 if len(rate.namelist) <= 0 else rate.rate / len(rate.namelist)
-            message += '%0.3f(%0.3f) %d %s len:%d\n' % (rate.rate, unitrate, rate.star, rate.namelist[-1], len(rate.namelist) )
-
-        return message
-
-    @staticmethod
-    def GachaType(g):
-        if g == '1' : return '恒常星1'
-        if g == '2' : return '恒常星2'
-        if g == '3' : return '恒常星3'
-        if g == 'l' : return '限定'
-        if g == 'd' : return '2倍'
-        if g == 'p' : return 'プライズ'
-        if g == 'f' : return 'プリフェス'
-        return 'Unknown'
-
-    @staticmethod
-    def GachaScheduleData():
-        message = ''
-        num = 0
-        for m in reversed(GachaData):
-            if 9 <= num or m.startdate <= '2000/01/01 00:00:00':
-                break
-            message +=  '%d: %s [%s] [%s]\n' % (num + 1, m.startdate, Gacha.GachaType(m.gachatype), Gacha.NameListToString(m.name) )
-            num += 1
-        
-        return message
-       
-    @staticmethod
-    def Lottery(box : List[T], leaststar = 1) -> T:
-        rndstar = random.random() * 100
-        before = None
-        for b in box:
-            if b.star < leaststar:
-                return before
-
-            if rndstar <= b.rate:
-                return b
-
-            rndstar -= b.rate
-            before = b
-
-    @staticmethod
-    def LotteryPrincess(box : List[GachaRate], leaststar = 1) -> Princess:
-
-        b = Gacha.Lottery(box, leaststar)
-        p = random.randint(0, len(b.namelist) - 1)
-        return Princess(b.namelist[p], b.star)
-
-    @staticmethod
-    def LotteryPrize(leaststar = 1) -> PrizeRate:
-        box = [
-            PrizeRate(0.5, 6, 40, 5, 5),
-            PrizeRate(  1, 5, 20, 5, 3),
-            PrizeRate(  5, 4,  5, 1, 3),
-            PrizeRate( 10, 3,  1, 1, 2),
-            PrizeRate(23.5,2,  0, 1, 1),
-            PrizeRate(100, 1,  0, 1, 0),
-        ]
-
-        return Gacha.Lottery(box, leaststar)
-
-gacha = Gacha()
+#gacha = Gacha()
 
 #クランスコア計算ロジック
 
@@ -528,8 +284,8 @@ class StringChopper:
     
 class PrincessIndex:
     def __init__(self):
-        self.name2index :Dict[str, int] = {}
-        self.index2name :Dict[int, str] = {}
+        self.name2index: Dict[str, int] = {}
+        self.index2name: Dict[int, str] = {}
         self.charactorChopper = StringChopper()
 
     def Register(self, index :int, name :str, alias: bool):
@@ -563,7 +319,7 @@ class PrincessIndex:
         return None
 
     def Load(self):
-        with open('princess.txt') as f:
+        with open('princess.txt','r',encoding="utf-8_sig") as f:
             for s_line in f:
                 namearray = s_line.split()
                 if len(namearray) < 2: continue
@@ -683,7 +439,7 @@ class ClanMember():
         self.reportlimit = None
         self.name = ''
         self.taskkill = 0
-        self.history : List[Dict[str, Any]] = []
+        self.history: List[Dict[str, Any]] = []
         self.boss = 0
         self.notice = None
         self.mention = ''
@@ -710,7 +466,7 @@ class ClanMember():
         self.reportlimit = datetime.datetime.now() + datetime.timedelta(minutes = 30)
 
         if (renewal):
-            self.boss = clan.bosscount
+            self.boss = clan.boss_count
 
     def DecoName(self, opt : str) -> str:
         s = ''
@@ -1184,9 +940,10 @@ class DamageControl():
                 self.channel = None
         finally:
             self.outputlock = 0
-   
-class Clan():
-    numbermarks = [
+
+
+class Clan:
+    number_marks = [
         "\N{DIGIT ZERO}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
         "\N{DIGIT ONE}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
         "\N{DIGIT TWO}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
@@ -1201,27 +958,27 @@ class Clan():
 
     emojis = [
         u"\u2705",
-        "\N{DIGIT TWO}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT THREE}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT FOUR}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT FIVE}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT SIX}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT SEVEN}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT EIGHT}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
-        "\N{DIGIT NINE}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
+        "\N{DIGIT TWO}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT THREE}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT FOUR}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT FIVE}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT SIX}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT SEVEN}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT EIGHT}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
+        "\N{DIGIT NINE}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
         u"\u274C",
     ]
 
-    emojisoverkill = [
+    emoji_sover_kill = [
         u"\u2705",
-        "\N{DIGIT ZERO}\N{COMBINING ENCLOSING KEYCAP}", # type: ignore
+        "\N{DIGIT ZERO}\N{COMBINING ENCLOSING KEYCAP}",# type: ignore
         u"\u274C",
     ]
-    taskkillmark = u"\u2757"
+    task_kill_mark = u"\u2757"
 
-    def __init__(self, channelid : int):
+    def __init__(self, channelid: int):
         self.members: Dict[int, ClanMember] = {}
-        self.bosscount = 0
+        self.boss_count = 0
         self.channelid = channelid
         self.lastmessage : Optional[discord.Message] = None
         self.stampcheck :Dict[str, Any] = {}
@@ -1230,7 +987,7 @@ class Clan():
         self.defeatlist = []
         self.attacklist = []
 
-        self.guild : discord.Guild = None
+        self.guild: discord.Guild = None
         self.inputchannel = None
         self.outputchannel = None
 
@@ -1312,7 +1069,7 @@ class Clan():
 
     def FullReset(self):
         self.Reset()
-        self.bosscount = 0
+        self.boss_count = 0
         self.beforesortie = 0
         self.lap = {0 : 0.0}
         self.defeatlist.clear()
@@ -1345,13 +1102,13 @@ class Clan():
         return self.stampcheck['messageid']
     
     async def AddReaction(self, message, overkill):
-        reactemojis = self.emojis if not overkill else self.emojisoverkill
+        reactemojis = self.emojis if not overkill else self.emoji_sover_kill
 
         for emoji in reactemojis:
             await message.add_reaction(emoji)
 
     async def RemoveReaction(self, message, overkill : bool, me):
-        reactemojis = self.emojis if not overkill else self.emojisoverkill
+        reactemojis = self.emojis if not overkill else self.emoji_sover_kill
 
         for emoji in reactemojis:
             try:
@@ -1360,7 +1117,7 @@ class Clan():
                 break
 
     async def RemoveReactionNotCancel(self, message, overkill : bool, me):
-        reactemojis = self.emojis if not overkill else self.emojisoverkill
+        reactemojis = self.emojis if not overkill else self.emoji_sover_kill
 
         for emoji in reactemojis:
             if emoji != u"\u274C":
@@ -1373,9 +1130,9 @@ class Clan():
         member.SetNotice(bossstr)
 
         if (member.notice is None):
-            mark = self.numbermarks[0]
+            mark = self.number_marks[0]
         else:
-            mark = self.numbermarks[member.notice]
+            mark = self.number_marks[member.notice]
 
         await message.add_reaction(mark)
 
@@ -1437,7 +1194,7 @@ class Clan():
     def AttackNum(self):
         return len([m for m in clan.members.values() if m.attack])
 
-    async def Attack(self, message, member : ClanMember, opt):
+    async def Attack(self, message, member: ClanMember, opt):
         self.CheckOptionNone(opt)
 
         if self.CheckInputChannel(message):
@@ -1458,7 +1215,7 @@ class Clan():
 
 
         if (member.taskkill != 0):
-            await message.add_reaction(self.taskkillmark)
+            await message.add_reaction(self.task_kill_mark)
 
         member.attackmessage = message
         await self.AddReaction(message, member.IsOverkill())
@@ -1470,7 +1227,7 @@ class Clan():
 
     async def TaskKill(self, message, member : ClanMember, opt):
         member.taskkill = message.id
-        await message.add_reaction(self.taskkillmark)
+        await message.add_reaction(self.task_kill_mark)
         return True
 
     async def PrevBoss(self, message, member : ClanMember, opt):
@@ -1489,7 +1246,7 @@ class Clan():
                 boss = int(sp[1])
 
                 if 1 <= lap and 1 <= boss and boss <= BOSSNUMBER:
-                    self.bosscount = (lap - 1) * BOSSNUMBER + boss - 1
+                    self.boss_count = (lap - 1) * BOSSNUMBER + boss - 1
                     await self.ChangeBoss(message.channel, 0)
                 else:
                     raise ValueError
@@ -1656,7 +1413,7 @@ class Clan():
     async def SettingReload(self, message, member : ClanMember, opt):
         channel = message.channel
 
-        GlobalStrage.Load()
+        GlobalStorage.load()
         gacha.BoxReset()
         await channel.send('リロードしました')
         await channel.send('term %s-%s' % (BATTLESTART, BATTLEEND))
@@ -1706,7 +1463,7 @@ class Clan():
         
         global BossName
         BossName = namearray
-        GlobalStrage.Save()
+        GlobalStorage.save()
 
         await channel.send('ボスを更新しました'+','.join(BossName))
         return True
@@ -1734,7 +1491,7 @@ class Clan():
             BATTLESTART = start.strftime('%m/%d')
             BATTLEEND = end.strftime('%m/%d')
 
-            GlobalStrage.Save()
+            GlobalStorage.save()
             await channel.send('クラバト期間は%s-%sです' % (BATTLESTART, BATTLEEND))
         except ValueError:
             await channel.send('日付エラーです')
@@ -1776,7 +1533,7 @@ class Clan():
 
         global GachaData
         GachaData.append(GachaSchedule(date, gtype, name))
-        GlobalStrage.Save()
+        GlobalStorage.save()
 
         await channel.send(mes)
         return False
@@ -1789,7 +1546,7 @@ class Clan():
             gindex = int(opt)
             if 0 < gindex and gindex <= len(GachaData):
                 GachaData.pop(-gindex)
-                GlobalStrage.Save()
+                GlobalStorage.save()
                 await channel.send(Gacha.GachaScheduleData())
                 return
         except ValueError:
@@ -1805,7 +1562,7 @@ class Clan():
 
         mes = ''
         for guild in client.guilds:
-            clan = clanhash.get(guild.id)
+            clan = clan_hash.get(guild.id)
             if clan is not None:
                 attackmembers = [m.name for m in clan.members.values() if m.attack]
                 atn = len(attackmembers)
@@ -1826,7 +1583,7 @@ class Clan():
         for guild in client.guilds:
             mes += '[%d] %s\n' % (guild.id, guild.name)
 
-            clan = clanhash.get(guild.id)
+            clan = clan_hash.get(guild.id)
             if clan is not None:
                 mes += clan.Status() + '\n'
 
@@ -2039,7 +1796,7 @@ class Clan():
         for idx, emoji in enumerate(self.emojis):
             if emoji == emojistr:
                 return idx
-        for idx, emoji in enumerate(self.emojisoverkill):
+        for idx, emoji in enumerate(self.emoji_sover_kill):
             if emoji == emojistr:
                 return idx
         return None
@@ -2080,13 +1837,13 @@ class Clan():
     async def ChangeBoss(self, channel, count):
         await self.damagecontrol.SendFinish('%s の討伐お疲れさまです' % (BossName[self.BossIndex()]))
 
-        self.bosscount += count
-        if (self.bosscount < 0):
-            self.bosscount = 0
+        self.boss_count += count
+        if (self.boss_count < 0):
+            self.boss_count = 0
         await channel.send('次のボスは %s です' % (BossName[self.BossIndex()]) )
 
         if (0 <= count):
-            self.AddDefeatTime(self.bosscount)
+            self.AddDefeatTime(self.boss_count)
 
             if (self.BossIndex() == 0):
                 self.lap[self.BossLap() - 1] = self.TotalSortie()
@@ -2142,7 +1899,7 @@ class Clan():
 
             member.notice = None
 
-            if (self.bosscount == boss):
+            if (self.boss_count == boss):
                 if self.inputchannel is not None:
                     await self.ChangeBoss(self.inputchannel, 1)
 
@@ -2184,7 +1941,7 @@ class Clan():
             if (data is not None):
                 member.Attack(self, False)
                 if (data['defeat']):
-                    if (data['bosscount'] + 1 == self.bosscount):
+                    if (data['bosscount'] + 1 == self.boss_count):
                         await self.ChangeBoss(self.inputchannel, -1)
                     await self.inputchannel.send('ボスが食い違う場合は手動で調整してください\n「prevboss」で前のボス、「nextboss」で次のボスに設定します')
                 
@@ -2216,7 +1973,7 @@ class Clan():
         return 0
 
     def LapAverage(self):
-        nowlap = self.bosscount // BOSSNUMBER
+        nowlap = self.boss_count // BOSSNUMBER
 
         if nowlap == 0 or nowlap not in self.lap:
             return 0
@@ -2231,14 +1988,14 @@ class Clan():
         return 0
 
     def BossIndex(self):
-        return self.bosscount % BOSSNUMBER
+        return self.boss_count % BOSSNUMBER
     
     def BossLap(self):
-        return self.bosscount // BOSSNUMBER + 1
+        return self.boss_count // BOSSNUMBER + 1
 
     def BossLevel(self):
         level = 1
-        lap = self.bosscount // BOSSNUMBER
+        lap = self.boss_count // BOSSNUMBER
         for lvlap in LevelUpLap:
             if lap < lvlap :
                 return level
@@ -2249,7 +2006,7 @@ class Clan():
         levelindex = self.BossLevel() - 1
 
         if len(LevelUpLap) <= levelindex: return 0
-        return (LevelUpLap[levelindex] - self.bosscount / BOSSNUMBER - 1)
+        return (LevelUpLap[levelindex] - self.boss_count / BOSSNUMBER - 1)
 
     def Status(self):
         s = ''
@@ -2302,7 +2059,7 @@ class Clan():
 
         for i, c in enumerate(count):
             if 0 < len(c):
-                slist = sorted(c, key=lambda member : member.lastactive, reverse=True)
+                slist = sorted(c, key=lambda member : member.last_active, reverse=True)
                 s += '%d回目 %d人\n' % (i, len(c))
                 s += '  '.join([m.DecoName('nOT') for m in slist]) + '\n'
         
@@ -2328,7 +2085,7 @@ class Clan():
     def Save(clan, clanid):
         dic = {
             'members': {},
-            'bosscount' : clan.bosscount,
+            'bosscount' : clan.boss_count,
             'channelid' : clan.channelid,
             'beforesortie' : clan.beforesortie,
             'lap' : clan.lap,
@@ -2349,7 +2106,7 @@ class Clan():
             mdic =  json.load(a)
 
             clan = Clan(mdic['channelid'])
-            clan.bosscount = mdic['bosscount']
+            clan.boss_count = mdic['bosscount']
 
             if 'beforesortie' in mdic:
                 clan.beforesortie = mdic['beforesortie']
@@ -2384,8 +2141,8 @@ class PrivateUser:
         self.id = author.id if author is not None else 0
         self.channel = channel
         self.author = author
-        self.guildid = 0
-        self.clan : Optional[Clan] = None
+        self.guild_id = 0
+        self.clan: Optional[Clan] = None
         self.have = set()
         self.unhave = set()
 
@@ -2447,7 +2204,7 @@ class PrivateUser:
             if len(clanlist) == 1:
                 await channel.send('%s のクランを参照します')
                 self.clan = clanlist[0]
-                self.guildid = self.clan.guild.id
+                self.guild_id = self.clan.guild.id
                 return True
             else:
                 mes = ''
@@ -2462,7 +2219,7 @@ class PrivateUser:
     def Serialize(self):
         dic = {
             'id' : self.id,
-            'guildid': self.guildid,
+            'guildid': self.guild_id,
             'have' : list(self.have),
             'unhave' : list(self.unhave),
             'used' : list(self.used)
@@ -2489,7 +2246,7 @@ class PrivateUser:
 
     @staticmethod
     def DefalutHaveLoad():
-        with open('defaulthave.txt') as f:
+        with open('defaulthave.txt','r',encoding="utf-8_sig") as f:
             for s_line in f:
                 n = princessIndex.GetIndex(s_line.strip())
                 if 0 < n:
@@ -2519,9 +2276,9 @@ class PrivateUser:
 
 PrivateUser.DefalutHaveLoad()
 
-userhash: Dict[int, PrivateUser] = {}
+user_hash: Dict[int, PrivateUser] = {}
 
-PrivateUser.LoadList(userhash)
+PrivateUser.LoadList(user_hash)
 
 class PartyInfoList:
     def __init__(self):
@@ -2853,15 +2610,15 @@ class PrivateMessage:
     def GetClanList(userid : int):
         clanlist:List[Clan] = []
 
-        for clan in clanhash.values():
+        for clan in clan_hash.values():
             if userid in clan.members:
                 clanlist.append(clan)
         return clanlist
 
     @staticmethod
     def UserSave():
-        global userhash
-        PrivateUser.SaveList(userhash)
+        global user_hash
+        PrivateUser.SaveList(user_hash)
 
     @staticmethod
     async def SetClan(user : PrivateUser, channel, opt : str):
@@ -2885,7 +2642,7 @@ class PrivateMessage:
 
         user.clan = joinclan[0]
         if user.clan is not None:
-            user.guildid = user.clan.guild.id
+            user.guild_id = user.clan.guild.id
 
         await channel.send('%s にクランを設定しました' % (opt))
         PrivateMessage.UserSave()
@@ -3084,7 +2841,7 @@ intents.typing = False  # typingを受け取らないように
 intents.members = True  # membersを受け取る
 client = discord.Client(intents=intents)
 
-clanhash: Dict[int, Clan] = {}
+clan_hash: Dict[int, Clan] = {}
 
 # ギルドデータ読み込み
 files = glob.glob("./clandata/*.json")
@@ -3093,15 +2850,15 @@ for file in files:
     clanid = int (os.path.splitext(os.path.basename(file))[0])
     if clanid != 0:
         clan = Clan.Load(clanid)
-        clanhash[clanid] = clan
+        clan_hash[clanid] = clan
 
 def GetClan(guild, message) -> Clan:
-    global clanhash
-    g = clanhash.get(guild.id)
+    global clan_hash
+    g = clan_hash.get(guild.id)
 
     if (g is None):
         g = Clan(message.channel.id)
-        clanhash[guild.id] = g
+        clan_hash[guild.id] = g
 
     if g.guild is None:
         g.guild = guild
@@ -3116,9 +2873,9 @@ async def loop():
     nowtime = now.strftime('%H:%M')
 
     if nowtime == '05:00':
-        Outlog(ERRFILE, '05:00 batch start len:%d ' % (len(clanhash)))
+        Outlog(ERRFILE, '05:00 batch start len:%d ' % (len(clan_hash)))
         
-        for guildid, clan in clanhash.items():
+        for guildid, clan in clan_hash.items():
             try:
                 message = 'おはようございます\nメンバーの情報をリセットしました'
                 resetflag = True if clan.SortieCount() != 0 else False
@@ -3155,21 +2912,21 @@ async def loop():
             except Exception as e:
                 Outlog(ERRFILE, 'error: %s e.args:%s' % (clan.guild.name, e.args))
 
-        for user in userhash.values():
+        for user in user_hash.values():
             user.UsedClear()
         
-        PrivateUser.SaveList(userhash)
+        PrivateUser.SaveList(user_hash)
         Outlog(ERRFILE, '05:00 batch end')
 
     if nowtime == '23:59':
-        for clan in clanhash.values():
+        for clan in clan_hash.values():
             if (nowdate == BATTLEEND):
                 if clan.inputchannel is not None:
                     message = 'クランバトル終了です。お疲れさまでした。'
                     await clan.inputchannel.send(message)
     
     shtime = now
-    for clan in clanhash.values():
+    for clan in clan_hash.values():
         for member in clan.members.values():
             if (member.reportlimit is not None and member.reportlimit < shtime):
                 member.reportlimit = None
@@ -3183,31 +2940,40 @@ def IsClanBattle():
     return False
 
 
-# 起動時に動作する処理
 @client.event
 async def on_ready():
+    """
+    bot起動時に動作する処理
+
+    以下の処理を行う。
+    ・
+    ・
+    ・
+
+    :return:
+    """
     # 起動したらターミナルにログイン通知が表示される
     print('ログインしました')
     Outlog(ERRFILE, "login.")
 
-    global clanhash
-    global userhash
+    global clan_hash
+    global user_hash
 
-    for guildid, clan in clanhash.items():
+    for guild_id, clan in clan_hash.items():
         if clan.guild is None:
-            matchguild = [g for g in client.guilds if g.id == guildid]
-            if len(matchguild) == 1:
-                clan.guild = matchguild[0]
-                print(matchguild[0].name + " set.")
+            match_guild = [g for g in client.guilds if g.id == guild_id]
+            if len(match_guild) == 1:
+                clan.guild = match_guild[0]
+                print(match_guild[0].name + " set.")
             else: 
-                print('[%d] not found' % guildid)
+                print('[%d] not found' % guild_id)
 
-    for user in userhash.values():
-        if user.clan is None and user.guildid != 0:
-            user.clan = clanhash.get(user.guildid)
+    for user in user_hash.values():
+        if user.clan is None and user.guild_id != 0:
+            user.clan = clan_hash.get(user.guild_id)
             if user.clan is None:
-                print('[%d] not found' % user.guildid)
-                user.guildid = 0
+                print('[%d] not found' % user.guild_id)
+                user.guild_id = 0
 
 async def VolatilityMessage(channel, mes, time):
     log = await channel.send(mes)
@@ -3229,12 +2995,12 @@ async def on_message(message):
             await Output(clan, clan.Status())
         return
 
-    global userhash
+    global user_hash
     if message.channel.type == discord.ChannelType.private:
-        user = userhash.get(message.author.id)
+        user = user_hash.get(message.author.id)
         if user is None:
             user = PrivateUser(message.channel, message.author)
-            userhash[message.author.id] = user
+            user_hash[message.author.id] = user
         else:
             user.channel = message.channel
             user.author = message.author
@@ -3247,7 +3013,7 @@ async def on_message(message):
 
 @client.event
 async def on_raw_message_delete(payload):
-    clan = clanhash.get(payload.guild_id)
+    clan = clan_hash.get(payload.guild_id)
 
     if clan is not None and clan.IsInput(payload.channel_id):
 
@@ -3258,7 +3024,7 @@ async def on_raw_message_delete(payload):
 
 @client.event
 async def on_raw_reaction_add(payload):
-    clan = clanhash.get(payload.guild_id)
+    clan = clan_hash.get(payload.guild_id)
 
     if clan is not None:
         result = await clan.on_raw_reaction_add(payload)
@@ -3269,7 +3035,7 @@ async def on_raw_reaction_add(payload):
 @client.event
 async def on_raw_reaction_remove(payload):
 
-    clan = clanhash.get(payload.guild_id)
+    clan = clan_hash.get(payload.guild_id)
 
     if clan is not None and clan.IsInput(payload.channel_id):
 
@@ -3282,7 +3048,7 @@ async def on_raw_reaction_remove(payload):
 async def on_member_remove(member):
     if member.bot: return
 
-    clan = clanhash.get(member.guild.id)
+    clan = clan_hash.get(member.guild.id)
     if (clan is None): return
 
     if member.id in clan.members:
@@ -3296,10 +3062,10 @@ async def on_guild_join(guild):
 
 @client.event
 async def on_guild_remove(guild):
-    global clanhash
+    global clan_hash
 
-    if guild.id in clanhash:
-        del clanhash[guild.id]
+    if guild.id in clan_hash:
+        del clan_hash[guild.id]
         try:
             os.remove('clandata/%d.json' % (guild.id))
         except FileNotFoundError:
@@ -3335,7 +3101,7 @@ def Outlog(filename, data):
     datestr = datetime_format.strftime("%Y/%m/%d %H:%M:%S")  # 2017/11/12 09:55:28
     print(datestr + " " + data, file=codecs.open(filename, 'a', 'utf-8'))
 
-GlobalStrage.Load()
+GlobalStorage.load()
 
 #ループ処理実行
 loop.start()

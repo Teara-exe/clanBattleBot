@@ -1,0 +1,2 @@
+class AlreadySameAttackStartError(Exception):
+    pass

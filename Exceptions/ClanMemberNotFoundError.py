@@ -1,0 +1,2 @@
+class ClanMemberNotFoundError(Exception):
+    pass
