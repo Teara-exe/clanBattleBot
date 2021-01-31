@@ -8,13 +8,9 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
-from yukarisan.Models.ClanMember import ClanMember
-from yukarisan.Exceptions.ClanMemberNotFoundError import ClanMemberNotFoundError
-from yukarisan.Models.SameTimeAttack import SameTimeAttack
-
-# 自分用テストサーバー
-# TARGET_GUILD_ID = 727109531880128625
-# TARGET_ROLE_ID = 751478002105319475
+from Models.ClanMember import ClanMember
+from Exceptions.ClanMemberNotFoundError import ClanMemberNotFoundError
+from Models.SameTimeAttack import SameTimeAttack
 
 
 class Context:

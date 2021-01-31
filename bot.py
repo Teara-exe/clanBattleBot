@@ -4,25 +4,8 @@ from pathlib import Path
 import discord
 import yaml
 from discord.ext import commands
+from Cogs import *
 
-from yukarisan.Cogs.AttackCog import AttackCog
-from yukarisan.Cogs.AttackStatusCog import AttackStatusCog
-from yukarisan.Cogs.CommandErrorHandlerCog import CommandErrorHandlerCog
-from yukarisan.Cogs.PreviousClanMemberStatusCog import PreviousClanMemberStatusCog
-from yukarisan.Cogs.SetupCog import SetupCog
-from yukarisan.Cogs.BossLapCalcCog import BossLapCalcCog
-from yukarisan.Cogs.AttackCancelCog import AttackCancelCog
-from yukarisan.Cogs.AttackFinishCog import AttackFinishCog
-from yukarisan.Cogs.UpdateAttackCountCog import UpdateAttackCountCog
-from yukarisan.Cogs.UpdateByDayChangeCog import UpdateByDayChangeCog
-from yukarisan.Cogs.UseTaskKillCog import UseTaskKillCog
-from yukarisan.Cogs.SameTimeAttackStartCog import SameTimeAttackStartCog
-from yukarisan.Cogs.SameTimeAttackAddMemberCog import SameTimeAttackAddMemberCog
-from yukarisan.Cogs.SameTimeAttackReportCog import SameTimeAttackReportCog
-from yukarisan.Cogs.SameTimeAttackCommitCog import SameTimeAttackCommitCog
-from yukarisan.Cogs.SameTimeAttackEndCog import SameTimeAttackEndCog
-from yukarisan.Cogs.AttackOverKillCog import AttackOverKillCog
-from yukarisan.Cogs.AttackCountWriteCog import AttackCountWriteCog
 
 if __name__ == '__main__':
     # intentを入れないとメンバーが取れない
@@ -30,34 +13,34 @@ if __name__ == '__main__':
     bot = commands.Bot(command_prefix='', intents=intents)
 
     # start up
-    bot.add_cog(SetupCog(bot))
+    bot.add_cog(SetupCog.SetupCog(bot))
 
     # 凸管理機能
-    bot.add_cog(AttackCog(bot))
-    bot.add_cog(AttackCancelCog(bot))
-    bot.add_cog(AttackFinishCog(bot))
-    bot.add_cog(AttackOverKillCog(bot))
-    bot.add_cog(UseTaskKillCog(bot))
-    bot.add_cog(AttackStatusCog(bot))
-    bot.add_cog(PreviousClanMemberStatusCog(bot))
+    bot.add_cog(AttackCog.AttackCog(bot))
+    bot.add_cog(AttackCancelCog.AttackCancelCog(bot))
+    bot.add_cog(AttackFinishCog.AttackFinishCog(bot))
+    bot.add_cog(AttackOverKillCog.AttackOverKillCog(bot))
+    bot.add_cog(UseTaskKillCog.UseTaskKillCog(bot))
+    bot.add_cog(AttackStatusCog.AttackStatusCog(bot))
+    bot.add_cog(PreviousClanMemberStatusCog.PreviousClanMemberStatusCog(bot))
 
     # 同時凸機能
-    bot.add_cog(SameTimeAttackStartCog(bot))
-    bot.add_cog(SameTimeAttackAddMemberCog(bot))
-    bot.add_cog(SameTimeAttackReportCog(bot))
-    bot.add_cog(SameTimeAttackCommitCog(bot))
-    bot.add_cog(SameTimeAttackEndCog(bot))
+    bot.add_cog(SameTimeAttackStartCog.SameTimeAttackStartCog(bot))
+    bot.add_cog(SameTimeAttackAddMemberCog.SameTimeAttackAddMemberCog(bot))
+    bot.add_cog(SameTimeAttackReportCog.SameTimeAttackReportCog(bot))
+    bot.add_cog(SameTimeAttackCommitCog.SameTimeAttackCommitCog(bot))
+    bot.add_cog(SameTimeAttackEndCog.SameTimeAttackEndCog(bot))
 
     # サブ機能
-    bot.add_cog(AttackCountWriteCog(bot))
-    bot.add_cog(BossLapCalcCog(bot))
+    bot.add_cog(AttackCountWriteCog.AttackCountWriteCog(bot))
+    bot.add_cog(BossLapCalcCog.BossLapCalcCog(bot))
 
     # schedule
-    bot.add_cog(UpdateByDayChangeCog(bot))
-    bot.add_cog(UpdateAttackCountCog(bot))
+    bot.add_cog(UpdateByDayChangeCog.UpdateByDayChangeCog(bot))
+    bot.add_cog(UpdateAttackCountCog.UpdateAttackCountCog(bot))
 
     # ErrorHandling
-    bot.add_cog(CommandErrorHandlerCog(bot))
+    bot.add_cog(CommandErrorHandlerCog.CommandErrorHandlerCog(bot))
 
     # tokenを取得する
     path: Path = Path(os.path.dirname(os.path.abspath(__file__)))

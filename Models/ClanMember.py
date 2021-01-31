@@ -2,11 +2,11 @@ from typing import Optional, List
 
 import discord
 
-from yukarisan.Exceptions.AlreadyAttackError import AlreadyAttackError
-from yukarisan.Exceptions.AlreadyUseTaskKillError import AlreadyUseTaskKillError
-from yukarisan.Exceptions.NotAttackError import NotAttackError
-from yukarisan.Exceptions.MaxAttackError import MaxAttackError
-from yukarisan.Models.AttackStatus import AttackStatus
+from Exceptions.AlreadyAttackError import AlreadyAttackError
+from Exceptions.AlreadyUseTaskKillError import AlreadyUseTaskKillError
+from Exceptions.NotAttackError import NotAttackError
+from Exceptions.MaxAttackError import MaxAttackError
+from Models.AttackStatus import AttackStatus
 
 
 class ClanMember:

@@ -1,9 +1,9 @@
 from typing import List
 
 import discord
-from yukarisan.Exceptions.AlreadySameAttackStartError import AlreadySameAttackStartError
-from yukarisan.Exceptions.NotSameAttackStartError import NotSameAttackStartError
-from yukarisan.Exceptions.AlreadySameAttackStartMemberError import AlreadySameAttackStartMemberError
+from Exceptions.AlreadySameAttackStartError import AlreadySameAttackStartError
+from Exceptions.NotSameAttackStartError import NotSameAttackStartError
+from Exceptions.AlreadySameAttackStartMemberError import AlreadySameAttackStartMemberError
 
 
 class SameAttackData:

@@ -1,10 +1,10 @@
 import discord
 from discord.ext import commands
 
-from yukarisan.Models.Context import Context
-from yukarisan.Models.ClanMember import ClanMember
-from yukarisan.Lib.Utils import Utils
-from yukarisan.Models.ClanBattleEmoji import ClanBattleEmoji
+from Models.Context import Context
+from Models.ClanMember import ClanMember
+from Lib.Utils import Utils
+from Models.ClanBattleEmoji import ClanBattleEmoji
 
 
 class AttackOverKillCog(commands.Cog):

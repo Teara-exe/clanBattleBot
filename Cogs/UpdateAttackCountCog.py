@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 
-from yukarisan.Models.Context import Context
+from Models.Context import Context
 
 
 class UpdateAttackCountCog(commands.Cog):

@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from yukarisan.Lib.Utils import Utils
-from yukarisan.Models.Context import Context
+from Lib.Utils import Utils
+from Models.Context import Context
 
 
 class AttackStatusCog(commands.Cog):

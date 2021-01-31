@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from yukarisan.Models.Context import Context
+from Models.Context import Context
 
 
 class SameTimeAttackStartCog(commands.Cog):
