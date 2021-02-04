@@ -51,7 +51,7 @@ class Context:
                     # 設定ファイルの読み込みを行う
                     path: Path = Path(os.path.dirname(os.path.abspath(__file__)))
                     abs_dir: str = str(path.parent)
-                    with open(r'{}\appsettings.yml'.format(abs_dir), "r", encoding="utf-8_sig") as f:
+                    with open(os.path.join(abs_dir, 'appsettings.yml'), "r", encoding="utf-8_sig") as f:
                         settings = yaml.safe_load(f)
                         cls.target_guild_id = settings["target_guild_id"]
                         cls.target_role_id = settings["target_role_id"]

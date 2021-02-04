@@ -46,7 +46,7 @@ if __name__ == '__main__':
     path: Path = Path(os.path.dirname(os.path.abspath(__file__)))
     abs_dir: str = str(path)
     token: str
-    with open(r'{}\appsettings.yml'.format(abs_dir), "r", encoding="utf-8_sig") as f:
+    with open(os.path.join(abs_dir, 'appsettings.yml'), "r", encoding="utf-8_sig") as f:
         settings = yaml.safe_load(f)
         token = settings["discord_bot_token"]
     # Botの起動とDiscordサーバーへの接続
