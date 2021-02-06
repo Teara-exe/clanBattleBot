@@ -20,6 +20,7 @@ class LoadConfig:
     target_role_id: int
     attack_management_channel_id: int
     attack_status_channel_id: int
+    is_change_nickname: bool
 
     def __new__(cls):
         raise NotImplementedError("Cannot initialize via Constructor")
@@ -45,5 +46,6 @@ class LoadConfig:
                         cls.target_role_id = settings["target_role_id"]
                         cls.attack_management_channel_id = settings["attack_management_channel_id"]
                         cls.attack_status_channel_id = settings["attack_status_channel_id"]
+                        cls.is_change_nickname = settings["is_change_nickname"]
 
         return cls._unique_instance

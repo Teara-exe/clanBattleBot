@@ -8,6 +8,7 @@ from Exceptions.AlreadyUseTaskKillError import AlreadyUseTaskKillError
 from Exceptions.NotAttackError import NotAttackError
 from Exceptions.MaxAttackError import MaxAttackError
 from Models.AttackStatus import AttackStatus
+from Models.LoadConfig import LoadConfig
 
 
 class ClanMember:
@@ -151,6 +152,11 @@ class ClanMember:
         本機能は権限周りに問題があれば例外で止まってしまうので、エラーを握りつぶします
         :return:
         """
+        # 設定値で設定が入ってない場合は何もしない
+        config: LoadConfig = LoadConfig.get_instance()
+        if not config.is_change_nickname:
+            return
+
         user_name: str = self.get_member_nickname()
 
         # 0.5凸以上 / タスキル利用済みの場合はニックネーム変更
