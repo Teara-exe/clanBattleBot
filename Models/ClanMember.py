@@ -1,3 +1,4 @@
+import re
 from typing import Optional, List
 
 import discord
@@ -17,7 +18,7 @@ class ClanMember:
 
     # ---- attributes ---- #
     # discordのUserデータ
-    discord_user_data: discord.User
+    discord_guild_member: discord.Member
 
     # 凸中かどうか(メッセージ管理してれば凸中)
     attack_message: Optional[discord.Message]
@@ -29,11 +30,11 @@ class ClanMember:
     # タスクキルしたかどうか
     use_task_kill: bool
 
-    def __init__(self, user: discord.User):
+    def __init__(self, member: discord.Member):
         """
         管理データ初期化
         """
-        self.discord_user_data = user
+        self.discord_guild_member = member
         self.reset_status()
 
     def reset_status(self):
@@ -124,6 +125,7 @@ class ClanMember:
         self.attack_status = AttackStatus(is_carry_over=previous_status.is_carry_over,
                                           attack_count=previous_status.attack_count,
                                           use_task_kill=True)
+
         self.attack_message = None
 
     def previous_status(self):
@@ -135,6 +137,35 @@ class ClanMember:
             raise Exception()
 
         self.attack_status = self.attack_history.pop(-1)
+
+    def get_member_nickname(self) -> str:
+        """
+        ユーザのニックネームを取得する
+        :return:
+        """
+        return re.sub(r'__.+$', '', self.discord_guild_member.display_name)
+
+    async def update_member_name(self):
+        """
+        ユーザ名に状態を追加する
+        本機能は権限周りに問題があれば例外で止まってしまうので、エラーを握りつぶします
+        :return:
+        """
+        user_name: str = self.get_member_nickname()
+
+        # 0.5凸以上 / タスキル利用済みの場合はニックネーム変更
+        if self.attack_status.attack_count != 0 or self.attack_status.is_carry_over or self.attack_status.use_task_kill:
+            # 凸回数追加
+            user_name += '__{}'.format(self.attack_status.attack_count)
+            # 持越しがあれば持越し追加
+            user_name += '.5凸' if self.attack_status.is_carry_over else '凸'
+            # タスキルしてればその旨を追加
+            user_name += '_タスキル済み' if self.attack_status.use_task_kill else ''
+
+        try:
+            await self.discord_guild_member.edit(nick=user_name)
+        except:
+            print("nickname変更のパーミッションエラーを握りつぶしました")
 
     def remain_attack_count(self) -> int:
         return ClanMember.MAX_ATTACK_COUNT - self.attack_status.attack_count

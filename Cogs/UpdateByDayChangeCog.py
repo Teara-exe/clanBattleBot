@@ -36,7 +36,7 @@ class UpdateByDayChangeCog(commands.Cog):
         now_datetime: datetime = datetime.now()
         if last_update < target_datetime <= now_datetime:
             # Statusの更新
-            context.reset_status(now_datetime)
+            await context.reset_status(now_datetime)
             print("reset_status...{}".format(now_datetime.strftime("%H:%M:%S")))
 
         # 凸数管理メッセージが管理されていなかったら投稿してセットする

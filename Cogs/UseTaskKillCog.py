@@ -31,8 +31,11 @@ class UseTaskKillCog(commands.Cog):
         clan_member.exec_task_kill()
         # キャンセル処理
         return_message: str = "【タスキル使用】{} さんの{}凸目{}をキャンセルしました".format(
-            clan_member.discord_user_data.display_name,
+            clan_member.get_member_nickname(),
             clan_member.attack_status.attack_count + 1,
             "(持越し)" if clan_member.attack_status.is_carry_over else ""
         )
         await ctx.message.channel.send(return_message)
+
+        # 凸状態が変わるのでニックネーム修正
+        await clan_member.update_member_name()

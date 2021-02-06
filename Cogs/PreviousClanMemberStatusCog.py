@@ -40,6 +40,9 @@ class PreviousClanMemberStatusCog(commands.Cog):
             "【持越し】" if now_attack_status.is_carry_over else "",
             "【タスキル済み】" if now_attack_status.use_task_kill else "")
 
-        return_message: str = "{}さんの状態を変更しました。\n{}\n{}".format(clan_member.discord_user_data.display_name,
+        return_message: str = "{}さんの状態を変更しました。\n{}\n{}".format(clan_member.get_member_nickname(),
                                                                previous_status_message, now_status_message)
         await ctx.message.channel.send(return_message)
+
+        # 凸状態が変わるのでニックネーム修正
+        await clan_member.update_member_name()
