@@ -50,7 +50,7 @@ class AttackCancelCog(commands.Cog):
 
     async def _cancel(self, message: discord.Message):
         # 対象チャンネル以外でスルー
-        if not await Utils.check_channel(self.bot, message):
+        if not Utils.check_channel(message):
             return
 
         # クラメンデータ検索

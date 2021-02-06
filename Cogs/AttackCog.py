@@ -22,7 +22,7 @@ class AttackCog(commands.Cog):
             return
 
         # 対象チャンネル以外でスルー
-        if not await Utils.check_channel(self.bot, ctx.message):
+        if not Utils.check_channel(ctx.message):
             return
 
         # クラメンデータ検索

@@ -47,7 +47,7 @@ class AttackOverKillCog(commands.Cog):
     async def _kill(self, message: discord.Message):
 
         # 対象チャンネル以外でスルー
-        if not await Utils.check_channel(self.bot, message):
+        if not Utils.check_channel(message):
             return
 
         context: Context = await Context.get_instance(self.bot)

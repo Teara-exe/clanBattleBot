@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from Models.Context import Context
+from Models.LoadConfig import LoadConfig
 
 
 class Utils:
@@ -22,8 +23,8 @@ class Utils:
         return reaction.emoji == emoji
 
     @staticmethod
-    async def check_channel(bot: commands.Bot, message: discord.Message) -> bool:
-        context: Context = await Context.get_instance(bot)
-        return context.attack_management_channel_id == message.channel.id
+    def check_channel(message: discord.Message) -> bool:
+        config: LoadConfig = LoadConfig.get_instance()
+        return config.attack_management_channel_id == message.channel.id
 
 

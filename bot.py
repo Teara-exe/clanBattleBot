@@ -5,7 +5,7 @@ import discord
 import yaml
 from discord.ext import commands
 from Cogs import *
-
+from Models.LoadConfig import LoadConfig
 
 if __name__ == '__main__':
     # intentを入れないとメンバーが取れない
@@ -43,11 +43,8 @@ if __name__ == '__main__':
     bot.add_cog(CommandErrorHandlerCog.CommandErrorHandlerCog(bot))
 
     # tokenを取得する
-    path: Path = Path(os.path.dirname(os.path.abspath(__file__)))
-    abs_dir: str = str(path)
-    token: str
-    with open(os.path.join(abs_dir, 'appsettings.yml'), "r", encoding="utf-8_sig") as f:
-        settings = yaml.safe_load(f)
-        token = settings["discord_bot_token"]
+    config: LoadConfig = LoadConfig.get_instance()
+    token: str = config.discord_bot_token
+
     # Botの起動とDiscordサーバーへの接続
     bot.run(token)

@@ -10,6 +10,7 @@ from discord.ext import commands
 
 from Models.ClanMember import ClanMember
 from Exceptions.ClanMemberNotFoundError import ClanMemberNotFoundError
+from Models.LoadConfig import LoadConfig
 from Models.SameTimeAttack import SameTimeAttack
 
 
@@ -20,12 +21,6 @@ class Context:
     """
     _unique_instance = None
     _lock = Lock()
-
-    # 設定ファイルから取ってくる値
-    target_guild_id: int
-    target_role_id: int
-    attack_management_channel_id: int
-    attack_status_channel_id: int
 
     # その他管理する値
     bot: commands.Bot
@@ -48,16 +43,6 @@ class Context:
                 if not cls._unique_instance:
                     cls._unique_instance = cls.__internal_new__()
 
-                    # 設定ファイルの読み込みを行う
-                    path: Path = Path(os.path.dirname(os.path.abspath(__file__)))
-                    abs_dir: str = str(path.parent)
-                    with open(os.path.join(abs_dir, 'appsettings.yml'), "r", encoding="utf-8_sig") as f:
-                        settings = yaml.safe_load(f)
-                        cls.target_guild_id = settings["target_guild_id"]
-                        cls.target_role_id = settings["target_role_id"]
-                        cls.attack_management_channel_id = settings["attack_management_channel_id"]
-                        cls.attack_status_channel_id = settings["attack_status_channel_id"]
-
                     # 初期化処理
                     cls.bot = bot
                     cls.clan_members = []
@@ -73,14 +58,15 @@ class Context:
         # 特定のロールのユーザを集める
         # note: 1つのguildのみにいれる想定
         target_guild: discord.Guild
+        config: LoadConfig = LoadConfig.get_instance()
         for guild in cls.bot.guilds:
-            if guild.id == cls.target_guild_id:
+            if guild.id == config.target_guild_id:
                 target_guild = guild
                 break
 
         target_role: discord.Role
         for role in target_guild.roles:
-            if role.id == cls.target_role_id:
+            if role.id == config.target_role_id:
                 target_role = role
         for member in target_role.members:
             cls.clan_members.append(ClanMember(await target_guild.fetch_member(member.id)))

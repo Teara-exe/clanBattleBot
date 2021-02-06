@@ -15,7 +15,7 @@ class AttackCountWriteCog(commands.Cog):
     @commands.command("dispcount")
     async def write_count(self, ctx: commands.context.Context):
         # 対象チャンネル以外でスルー
-        if not await Utils.check_channel(self.bot, ctx.message):
+        if not Utils.check_channel(ctx.message):
             return
 
         context: Context = await Context.get_instance(self.bot)

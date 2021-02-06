@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands, tasks
 
 from Models.Context import Context
+from Models.LoadConfig import LoadConfig
 
 
 class UpdateByDayChangeCog(commands.Cog):
@@ -41,6 +42,7 @@ class UpdateByDayChangeCog(commands.Cog):
 
         # 凸数管理メッセージが管理されていなかったら投稿してセットする
         if context.attack_count_message is None:
+            config: LoadConfig = LoadConfig.get_instance()
             return_message: str = context.get_now_attack_count()
-            channel: discord.TextChannel = self.bot.get_channel(context.attack_status_channel_id)
+            channel: discord.TextChannel = self.bot.get_channel(config.attack_status_channel_id)
             context.attack_count_message = await channel.send(return_message)
