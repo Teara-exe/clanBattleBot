@@ -42,6 +42,9 @@ if __name__ == '__main__':
     # ErrorHandling
     bot.add_cog(CommandErrorHandlerCog.CommandErrorHandlerCog(bot))
 
+    # alias
+    bot.add_cog(AliasCog.AliasCog(bot))
+
     # tokenを取得する
     config: LoadConfig = LoadConfig.get_instance()
     token: str = config.discord_bot_token

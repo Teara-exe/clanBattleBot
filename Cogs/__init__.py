@@ -1,3 +1,4 @@
+from . import AliasCog
 from . import AttackCancelCog
 from . import AttackCog
 from . import AttackCountWriteCog
