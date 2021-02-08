@@ -12,7 +12,7 @@ class AttackCountWriteCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command("dispcount")
+    @commands.command("dispcount", aliases=["凸数", "dispCount"])
     async def write_count(self, ctx: commands.context.Context):
         # 対象チャンネル以外でスルー
         if not Utils.check_channel(ctx.message):
@@ -20,7 +20,3 @@ class AttackCountWriteCog(commands.Cog):
 
         context: Context = await Context.get_instance(self.bot)
         await ctx.channel.send(context.get_now_attack_count())
-
-    @commands.command("凸数")
-    async def write_count_jp(self, ctx: commands.context.Context):
-        await self.write_count(ctx)

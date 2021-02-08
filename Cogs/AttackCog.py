@@ -15,7 +15,7 @@ class AttackCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="a")
+    @commands.command(name="a", aliases=["凸", "attack"])
     async def on_attack(self, ctx: commands.context.Context):
         # botの発言 / 自分へのメンション以外は無視
         if Utils.is_message_author_bot(ctx.message):
@@ -36,7 +36,3 @@ class AttackCog(commands.Cog):
         await ctx.message.add_reaction(ClanBattleEmoji.END)
         await ctx.message.add_reaction(ClanBattleEmoji.KILL)
         await ctx.message.add_reaction(ClanBattleEmoji.CANCEL)
-
-    @commands.command(name="凸")
-    async def on_attack_jp(self, ctx: commands.context.Context):
-        await self.on_attack(ctx)

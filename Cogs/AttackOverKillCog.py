@@ -16,17 +16,13 @@ class AttackOverKillCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command("k")
+    @commands.command("k", aliases=["kill", "〆"])
     async def over_kill(self, ctx: commands.context.Context):
         # botの発言 / 自分へのメンション以外は無視
         if Utils.is_message_author_bot(ctx.message):
             return
 
         await self._kill(ctx.message)
-
-    @commands.command("〆")
-    async def over_kill_jp(self, ctx: commands.context.Context):
-        await self.over_kill(ctx)
 
     @commands.Cog.listener(name='on_reaction_add')
     async def on_cancel_reaction(self, reaction: discord.Reaction, member: discord.Member):

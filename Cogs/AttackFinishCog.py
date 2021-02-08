@@ -15,7 +15,7 @@ class AttackFinishCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="f")
+    @commands.command(name="f", aliases=["終了", "finish"])
     async def on_finish(self, ctx: commands.context.Context):
         # botの発言 / 自分へのメンション以外は無視
         if Utils.is_message_author_bot(ctx.message):
@@ -23,10 +23,6 @@ class AttackFinishCog(commands.Cog):
 
         # 終了処理
         await self._finish(ctx.message)
-
-    @commands.command(name="終了")
-    async def on_finish_jp(self, ctx: commands.context.Context):
-        await self.on_finish(ctx)
 
     @commands.Cog.listener(name='on_reaction_add')
     async def on_cancel_reaction(self, reaction: discord.Reaction, member: discord.Member):

@@ -18,7 +18,7 @@ class AttackCancelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name='c')
+    @commands.command(name='c', aliases=["キャンセル", "cancel"])
     async def on_cancel(self, ctx: commands.context.Context):
         # botの発言 / 自分へのメンション以外は無視
         if Utils.is_message_author_bot(ctx.message):
@@ -26,10 +26,6 @@ class AttackCancelCog(commands.Cog):
 
         # キャンセル処理
         await self._cancel(ctx.message)
-
-    @commands.command(name="キャンセル")
-    async def on_cancel_jp(self, ctx: commands.context.Context):
-        await self.on_cancel(ctx)
 
     @commands.Cog.listener(name='on_reaction_add')
     async def on_cancel_reaction(self, reaction: discord.Reaction, member: discord.Member):

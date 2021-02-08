@@ -14,11 +14,7 @@ class UseTaskKillCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="タスキル")
-    async def use_task_kill_jp(self, ctx: commands.context.Context):
-        await self.use_task_kill(ctx)
-
-    @commands.command(name="taskKill")
+    @commands.command(name="taskKill", aliases=["タスキル", "taskkill"])
     async def use_task_kill(self, ctx: commands.context.Context):
         # botの発言 / 自分へのメンション以外は無視
         if Utils.is_message_author_bot(ctx.message):
