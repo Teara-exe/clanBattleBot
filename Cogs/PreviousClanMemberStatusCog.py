@@ -29,24 +29,5 @@ class PreviousClanMemberStatusCog(commands.Cog):
         context: Context = await Context.get_instance(self.bot)
         clan_member: ClanMember = context.get_clan_member(ctx.message.author.id)
 
-        # 1個前のステータスを出力する
-        previous_attack_status: AttackStatus = clan_member.attack_status
-        clan_member.previous_status()
-        now_attack_status: AttackStatus = clan_member.attack_status
-
-        # メッセージ生成
-        previous_status_message: str = "【前回】{}凸 {} {}".format(
-            previous_attack_status.attack_count,
-            "【持越し】" if previous_attack_status.is_carry_over else "",
-            "【タスキル済み】" if previous_attack_status.use_task_kill else "")
-        now_status_message: str = "【今回】{}凸 {} {} ".format(
-            now_attack_status.attack_count,
-            "【持越し】" if now_attack_status.is_carry_over else "",
-            "【タスキル済み】" if now_attack_status.use_task_kill else "")
-
-        return_message: str = "{}さんの状態を変更しました。\n{}\n{}".format(clan_member.get_member_nickname(),
-                                                               previous_status_message, now_status_message)
-        await ctx.message.channel.send(return_message)
-
-        # 凸状態が変わるのでニックネーム修正
-        await clan_member.update_member_name()
+        # ひとつ前に戻す処理
+        await clan_member.previous_status(ctx.message)

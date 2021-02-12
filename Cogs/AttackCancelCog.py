@@ -54,14 +54,4 @@ class AttackCancelCog(commands.Cog):
         clan_member: ClanMember = context.get_clan_member(message.author.id)
 
         # キャンセル処理
-        clan_member.cancel()
-        return_message: str = "{} さんの{}凸目{}をキャンセルしました".format(
-            clan_member.get_member_nickname(),
-            clan_member.attack_status.attack_count + 1,
-            "(持越し)" if clan_member.attack_status.is_carry_over else ""
-        )
-        await message.channel.send(return_message)
-    
-
-
-
+        await clan_member.cancel()

@@ -49,16 +49,5 @@ class AttackFinishCog(commands.Cog):
         context: Context = await Context.get_instance(self.bot)
         clan_member: ClanMember = context.get_clan_member(message.author.id)
 
-        # hack: 更新前に今の状態をもとに返すメッセージを作成する
-        return_message: str = "{} さんの{}凸目{}を終了しました".format(
-            clan_member.get_member_nickname(),
-            clan_member.attack_status.attack_count + 1,
-            "(持越し)" if clan_member.attack_status.is_carry_over else ""
-        )
-
         # 終了処理
-        clan_member.finish(is_kill=False)
-        await message.channel.send(return_message)
-
-        # 凸状態が変わるのでニックネーム修正
-        await clan_member.update_member_name()
+        await clan_member.finish(is_kill=False)

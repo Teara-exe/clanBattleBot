@@ -23,3 +23,6 @@ attack_status_channel_id: 000000
 # 凸数・タスキル数を名前に付与する設定
 # note: 設定する際はbotの権限や roleに気を払ってください
 is_change_nickname: false
+
+# end / kill / cancelコマンドを実行する時、返信じゃなく、絵文字で反応するかどうか
+use_emoji_reaction: false
