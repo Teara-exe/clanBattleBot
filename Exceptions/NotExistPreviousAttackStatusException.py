@@ -1,0 +1,2 @@
+class NotExistPreviousAttackStatusException(Exception):
+    pass

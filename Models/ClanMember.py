@@ -7,6 +7,7 @@ from Exceptions.AlreadyAttackError import AlreadyAttackError
 from Exceptions.AlreadyUseTaskKillError import AlreadyUseTaskKillError
 from Exceptions.NotAttackError import NotAttackError
 from Exceptions.MaxAttackError import MaxAttackError
+from Exceptions.NotExistPreviousAttackStatusException import NotExistPreviousAttackStatusException
 from Models.AttackStatus import AttackStatus
 from Models.ClanBattleEmoji import ClanBattleEmoji
 from Models.LoadConfig import LoadConfig
@@ -21,6 +22,9 @@ class ClanMember:
     # ---- attributes ---- #
     # discordのUserデータ
     discord_guild_member: discord.Member
+
+    # 凸中かどうか
+    in_progress: bool
 
     # 凸中かどうか(メッセージ管理してれば凸中)
     attack_message: Optional[discord.Message]
@@ -42,19 +46,13 @@ class ClanMember:
         管理データを初期化する
         :return:
         """
+        self.in_progress = False
         self.attack_message = None
         self.attack_status = AttackStatus(is_carry_over=False, attack_count=0, use_task_kill=False)
         self.attack_history = []
 
-    async def get_attack_message_copy(self) -> discord.Message:
-        """
-        messageのcopyを取得する
-        :return:
-        """
-        return await self.attack_message.channel.fetch_message(self.attack_message.id)
-
     @staticmethod
-    async def _reaction_to_message(message: discord.Message, message_str: str):
+    async def _reaction_to_message(message: discord.Message, message_str: str, is_force_message: bool = True):
         """
         凸終了/キャンセル時の反応処理
         :param message:
@@ -63,7 +61,7 @@ class ClanMember:
         """
         # configの設定値をもとに、mentionにするかreactionにするか変える
         config: LoadConfig = LoadConfig.get_instance()
-        if config.use_emoji_reaction:
+        if config.use_emoji_reaction and not is_force_message:
             await message.add_reaction(ClanBattleEmoji.THUMBS_UP)
         else:
             await message.reply(message_str)
@@ -74,13 +72,15 @@ class ClanMember:
         :return:
         """
         # 凸終了が出てないのに宣言するのはおかしい
-        if self.attack_message is not None:
+        if self.in_progress:
             raise AlreadyAttackError('先に凸完了宣言をしてください')
 
         # 3凸超えて凸するのはおかしい
         if self.attack_status.attack_count >= ClanMember.MAX_ATTACK_COUNT:
             raise MaxAttackError()
 
+        # 凸開始状態にする
+        self.in_progress = True
         self.attack_message = message
 
     async def finish(self, is_kill: bool):
@@ -93,7 +93,7 @@ class ClanMember:
         :return:
         """
         # 凸宣言がなかった場合はエラー
-        if self.attack_message is None:
+        if not self.in_progress:
             raise NotAttackError()
 
         # リアクション生成(先に作っておかないと、持ち越しなのかどうなのかが不明になる)
@@ -124,29 +124,27 @@ class ClanMember:
                                                   attack_count=prev_attack_status.attack_count + 1,
                                                   use_task_kill=prev_attack_status.use_task_kill)
 
-        # レスポンスより先に凸状態を消すので、コピーを取っておく
-        response_target_message: discord.Message = await self.get_attack_message_copy()
-
         # 凸状態削除
-        self.attack_message = None
+        self.in_progress = False
 
         # リアクション送信
-        await ClanMember._reaction_to_message(response_target_message, return_message)
+        await ClanMember._reaction_to_message(self.attack_message, return_message)
 
         # ニックネーム変更
         await self.update_member_name()
 
-    async def cancel(self):
+    async def cancel(self, is_force_reset: bool = False):
         """
         凸キャンセル処理
 
         :return:
         """
-        if self.attack_message is None:
+        # 強制リセットフラグがOFFかつ、まだ凸していない場合はエラーにする
+        if not is_force_reset and not self.in_progress:
             raise NotAttackError()
 
-        # レスポンスより先に凸状態を消すので、コピーを取っておく
-        response_target_message: discord.Message = await self.get_attack_message_copy()
+        if self.attack_status.attack_count >= self.MAX_ATTACK_COUNT:
+            raise MaxAttackError()
 
         # 凸前状況と凸後状況が変わらない(ｷｬﾝｾﾙ)のため、更新の前でも後でも問題なし
         return_message: str = "{} さんの{}凸目{}をキャンセルしました".format(
@@ -156,10 +154,10 @@ class ClanMember:
         )
 
         # 凸状態リセット
-        self.attack_message = None
+        self.in_progress = False
 
         # リアクション送信
-        await ClanMember._reaction_to_message(response_target_message, return_message)
+        await ClanMember._reaction_to_message(self.attack_message, return_message, is_force_reset)
 
     async def exec_task_kill(self, message: discord.Message):
         """
@@ -170,7 +168,7 @@ class ClanMember:
         if self.attack_status.use_task_kill:
             raise AlreadyUseTaskKillError()
         # そもそも凸していないときはタスキルできない
-        if self.attack_message is None:
+        if not self.in_progress:
             raise NotAttackError()
 
         # status 更新
@@ -179,8 +177,8 @@ class ClanMember:
         self.attack_status = AttackStatus(is_carry_over=previous_status.is_carry_over,
                                           attack_count=previous_status.attack_count,
                                           use_task_kill=True)
-
-        self.attack_message = None
+        # 凸していない状態に修正
+        self.in_progress = False
 
         # キャンセル処理
         return_message: str = "【タスキル使用】{} さんの{}凸目{}をキャンセルしました".format(
@@ -198,8 +196,11 @@ class ClanMember:
         状態をひとつ前に戻す
         :return:
         """
+        if self.in_progress:
+            raise AlreadyAttackError()
+
         if len(self.attack_history) == 0:
-            raise Exception()
+            raise NotExistPreviousAttackStatusException()
 
         # 戻す前の凸状況を保持しておく
         previous_attack_status: AttackStatus = self.attack_status

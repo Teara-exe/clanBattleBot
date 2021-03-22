@@ -8,6 +8,7 @@ from Exceptions.AlreadyUseTaskKillError import AlreadyUseTaskKillError
 from Exceptions.ClanMemberNotFoundError import ClanMemberNotFoundError
 from Exceptions.MaxAttackError import MaxAttackError
 from Exceptions.NotAttackError import NotAttackError
+from Exceptions.NotExistPreviousAttackStatusException import NotExistPreviousAttackStatusException
 from Exceptions.NotSameAttackStartError import NotSameAttackStartError
 
 
@@ -32,7 +33,7 @@ class CommandErrorHandlerCog(commands.Cog):
         # 自分が投げたエラーは原因がわかるので、エラーメッセージを書き換える
         if isinstance(error, CommandInvokeError):
             if isinstance(error.original, AlreadyAttackError):
-                send_str = "先に凸完了宣言をしてください。"
+                send_str = "先に凸完了宣言をしてください。\nメッセージが見つからない、リアクションを押しても動かない場合は「キャンセル」、もしくは「c」と送信してください。"
             elif isinstance(error.original, AlreadySameAttackStartError):
                 send_str = "既に同時凸が開始されています。先に前の同時凸を終了させてください。"
             elif isinstance(error.original, AlreadySameAttackStartMemberError):
@@ -47,5 +48,7 @@ class CommandErrorHandlerCog(commands.Cog):
                 send_str = "先に凸宣言をしてください。"
             elif isinstance(error.original, NotSameAttackStartError):
                 send_str = "同時凸か開始されていません。"
+            elif isinstance(error.original, NotExistPreviousAttackStatusException):
+                send_str = "これ以上戻ることはできません。"
 
         await ctx.message.reply(send_str)

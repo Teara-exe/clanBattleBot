@@ -20,6 +20,10 @@ class UseTaskKillCog(commands.Cog):
         if Utils.is_message_author_bot(ctx.message):
             return
 
+        # 対象チャンネル以外でスルー
+        if not Utils.check_channel(ctx.message):
+            return
+
         # クラメンデータ検索
         context: Context = await Context.get_instance(self.bot)
         clan_member: ClanMember = context.get_clan_member(ctx.message.author.id)

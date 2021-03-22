@@ -25,7 +25,7 @@ class AttackCancelCog(commands.Cog):
             return
 
         # キャンセル処理
-        await self._cancel(ctx.message)
+        await self._cancel(ctx.message, is_force_reset=True)
 
     @commands.Cog.listener(name='on_reaction_add')
     async def on_cancel_reaction(self, reaction: discord.Reaction, member: discord.Member):
@@ -44,7 +44,7 @@ class AttackCancelCog(commands.Cog):
         # キャンセル処理
         await self._cancel(reaction.message)
 
-    async def _cancel(self, message: discord.Message):
+    async def _cancel(self, message: discord.Message, is_force_reset: bool = False):
         # 対象チャンネル以外でスルー
         if not Utils.check_channel(message):
             return
@@ -54,4 +54,4 @@ class AttackCancelCog(commands.Cog):
         clan_member: ClanMember = context.get_clan_member(message.author.id)
 
         # キャンセル処理
-        await clan_member.cancel()
+        await clan_member.cancel(is_force_reset)

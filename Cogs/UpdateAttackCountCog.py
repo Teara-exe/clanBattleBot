@@ -21,4 +21,3 @@ class UpdateAttackCountCog(commands.Cog):
             return
         await context.attack_count_message.edit(content=context.get_now_attack_count())
 
-        print("update")
