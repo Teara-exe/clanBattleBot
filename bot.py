@@ -45,6 +45,9 @@ if __name__ == '__main__':
     # alias
     bot.add_cog(AliasCog.AliasCog(bot))
 
+    # 管理用
+    bot.add_cog(DeleteDetectCog.DeleteDetectCog(bot))
+
     # tokenを取得する
     config: LoadConfig = LoadConfig.get_instance()
     token: str = config.discord_bot_token

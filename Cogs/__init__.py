@@ -7,6 +7,7 @@ from . import AttackOverKillCog
 from . import AttackStatusCog
 from . import BossLapCalcCog
 from . import CommandErrorHandlerCog
+from . import DeleteDetectCog
 from . import PreviousClanMemberStatusCog
 from . import SameTimeAttackAddMemberCog
 from . import SameTimeAttackCommitCog
@@ -17,3 +18,4 @@ from . import SetupCog
 from . import UpdateAttackCountCog
 from . import UpdateByDayChangeCog
 from . import UseTaskKillCog
+

@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from Cogs.AttackCog import AttackCog
+from Lib.Utils import Utils
 from Models.ClanBattleEmoji import ClanBattleEmoji
 
 
@@ -18,6 +19,14 @@ class AliasCog(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def command_alias(self, message: discord.Message):
+        # botの発言 / 自分へのメンション以外は無視
+        if Utils.is_message_author_bot(message):
+            return
+
+        # 対象チャンネル以外でスルー
+        if not Utils.check_channel(message):
+            return
+
         command_msg: str = message.content
 
         # 「a(スペース無し)数値」→「a」に変換 「凸(スペース無し)数値」→「凸」に変換 ※数値は半角or全角
